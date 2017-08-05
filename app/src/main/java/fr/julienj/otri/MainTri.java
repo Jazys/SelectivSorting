@@ -1,3 +1,23 @@
+/*
+A faire par ordre de priorité
+- reste a afficher dans une alert Dialog le resultat de la recherche de consigne
+  avec le label + type de conteneur
+  Quand on clique, on peut aller directement sur la page des conteneurs
+
+- reste a afficher quand on clique sur le bac de tri, la liste disponibles des divers lables
+
+
+- faire le menu pour :
+    - ajouter un point de tri/recyclage
+    - ajouter un produit alimentaire
+
+- finir le spinner pour avoir tous les autres types de déchets
+
+- améliorer l'ihm
+
+ */
+
+
 package fr.julienj.otri;
 
 import android.Manifest;
@@ -22,6 +42,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,12 +57,15 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 import cz.msebera.android.httpclient.Header;
+import com.weiwangcn.betterspinner.library.material.MaterialBetterSpinner;
 
 public class MainTri extends AppCompatActivity implements View.OnClickListener  {
 
     private Button scanButton;
-    private Spinner listItemSortingView;
+    private MaterialBetterSpinner  listItemSortingView;
     private EditText seekProductView;
+    private Button seekPoductConteneur;
+    private TableRow tableRowBtnScan;
 
     //qr code scanner object
     private IntentIntegrator qrScan;
@@ -57,6 +81,12 @@ public class MainTri extends AppCompatActivity implements View.OnClickListener  
     private android.support.v4.app.FragmentManager fragmentManager;
     private android.support.v4.app.FragmentTransaction fragmentTransaction;
     private Fragment mapsGoogleFrag;
+    private Fragment contirbutionFrag;
+
+    private String keyworkSeek;
+    private String packingsSeek;
+
+    private String uriRestIndicationSortingFromKeywork;
 
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -68,6 +98,12 @@ public class MainTri extends AppCompatActivity implements View.OnClickListener  
                 case R.id.navigation_scan:
 
                     scanButton.setVisibility(View.VISIBLE);
+                    seekPoductConteneur.setVisibility(View.VISIBLE);
+                    seekProductView.setVisibility(View.VISIBLE);
+                    listItemSortingView.setVisibility(View.VISIBLE);
+
+                    tableRowBtnScan.setBackgroundResource(R.drawable.barcode);
+
 
                     if( webview!=null)
                         webview.setVisibility(View.VISIBLE);
@@ -82,9 +118,12 @@ public class MainTri extends AppCompatActivity implements View.OnClickListener  
                     return true;
                 case R.id.navigation_mapsContainer:
 
+                    seekPoductConteneur.setVisibility(View.GONE);
                     scanButton.setVisibility(View.GONE);
                     listItemSortingView.setVisibility(View.GONE);
                     seekProductView.setVisibility(View.GONE);
+
+                    tableRowBtnScan.setBackgroundResource(0);
 
                     if( webview!=null)
                         webview.setVisibility(View.GONE);
@@ -98,6 +137,23 @@ public class MainTri extends AppCompatActivity implements View.OnClickListener  
                     return true;
                 case R.id.navigation_notifications:
 
+                    seekPoductConteneur.setVisibility(View.GONE);
+                    scanButton.setVisibility(View.GONE);
+                    listItemSortingView.setVisibility(View.GONE);
+                    seekProductView.setVisibility(View.GONE);
+
+                    tableRowBtnScan.setBackgroundResource(0);
+
+                    if( webview!=null)
+                        webview.setVisibility(View.GONE);
+
+
+                    fragmentManager = getSupportFragmentManager();
+                    fragmentTransaction = fragmentManager.beginTransaction();
+                    contirbutionFrag = new ContributionFragment();
+                    fragmentTransaction.replace(R.id.fragment_container,contirbutionFrag);
+                    fragmentTransaction.commit();
+
                     return true;
             }
             return false;
@@ -110,14 +166,19 @@ public class MainTri extends AppCompatActivity implements View.OnClickListener  
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_tri);
 
+        tableRowBtnScan=(TableRow) findViewById(R.id.tableRowBtnScan);
 
+
+        seekPoductConteneur=(Button) findViewById(R.id.btnseekConteneur);
         scanButton=(Button) findViewById(R.id.btnscancode);
 
         //attaching onclick listener
         scanButton.setOnClickListener(this);
         scanButton.setVisibility(View.VISIBLE);
 
-        listItemSortingView=(Spinner) findViewById(R.id.listItemSorting);
+        seekPoductConteneur.setOnClickListener(this);
+
+        listItemSortingView=(MaterialBetterSpinner ) findViewById(R.id.listItemSorting);
         seekProductView=(EditText)  findViewById(R.id.seekProduct);
 
         listItemSortingView.setVisibility(View.VISIBLE);
@@ -147,6 +208,7 @@ public class MainTri extends AppCompatActivity implements View.OnClickListener  
         qrScan = new IntentIntegrator(this);
 
         mapsGoogleFrag=null;
+        contirbutionFrag=null;
 
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
@@ -226,7 +288,16 @@ public class MainTri extends AppCompatActivity implements View.OnClickListener  
     @Override
     public void onClick(View view) {
         //initiating the qr code scan
-        qrScan.initiateScan();
+        switch(view.getId()) {
+            case R.id.btnscancode:
+                qrScan.initiateScan();
+                break;
+            case R.id.btnseekConteneur:
+                System.out.println("test");
+                getIndicationForProduct();
+                break;
+        }
+
     }
 
 
@@ -275,6 +346,87 @@ public class MainTri extends AppCompatActivity implements View.OnClickListener  
                 }
             });
         }
+    }
+
+    public void getIndicationForProduct()
+    {
+        uriRestIndicationSortingFromKeywork="https://ecoproxy.redshift.fr/api/v2/" +
+                "Search?citycode=0&" +
+                "e="+ContainerData.getInstance().myLongitude+"&" +
+                "keyword=$KEYWORD$&" +
+                "n="+ContainerData.getInstance().myLatitude+"&" +
+                "packings=$PACKING$";
+
+
+        //https://ecoproxy.redshift.fr/api/v2/AutoComplete?searchText=carton
+        HttpUtils.get("https://ecoproxy.redshift.fr/api/v2/AutoComplete?searchText="+seekProductView.getText(), null, new JsonHttpResponseHandler(){
+            //HttpUtils.get("3222476439574.json", null, new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+
+                try{
+                    JSONArray listeItemSuggested= response.getJSONArray("keywords");
+
+                    JSONObject anItem = listeItemSuggested.getJSONObject(0);
+
+                    System.out.println(anItem.toString());
+
+                    packingsSeek=(anItem.getString("packings")).trim();
+                    keyworkSeek=(anItem.getString("keyword")).trim();
+
+                    uriRestIndicationSortingFromKeywork=uriRestIndicationSortingFromKeywork.replace("$KEYWORD$",keyworkSeek);
+                    uriRestIndicationSortingFromKeywork=uriRestIndicationSortingFromKeywork.replace("$PACKING$",packingsSeek);
+
+                    System.out.println("URI SEEK Product "+uriRestIndicationSortingFromKeywork);
+
+                    getonteneurFromIndicationProduct();
+
+                }catch (JSONException e) {
+                    e.printStackTrace();
+                    packingsSeek="";
+                    keyworkSeek="";
+                }
+            }
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONArray timeline) {
+
+            }
+        });
+    }
+
+    public void getonteneurFromIndicationProduct()
+    {
+        //https://ecoproxy.redshift.fr/api/v2/AutoComplete?searchText=carton
+        HttpUtils.get(uriRestIndicationSortingFromKeywork, null, new JsonHttpResponseHandler(){
+            //HttpUtils.get("3222476439574.json", null, new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+
+                try{
+                    JSONArray listeItemSuggested= response.getJSONArray("objects");
+
+                    for(int i=0; i<listeItemSuggested.length(); i++) {
+                        JSONObject aIndication = listeItemSuggested.getJSONObject(i);
+
+                        System.out.println("*"+(aIndication.getString("label")).trim());
+                        System.out.println("**"+(aIndication.getString("deposit")).trim());
+                        System.out.println("***"+(aIndication.getString("material")).trim());
+
+
+
+                    }
+                }catch (JSONException e) {
+                    e.printStackTrace();
+
+                }
+            }
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONArray timeline) {
+
+            }
+        });
     }
 
     public void showToast(final String toast)

@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/OTri.iml" filepath="$PROJECT_DIR$/OTri.iml" />
+      <module fileurl="file://$PROJECT_DIR$/SelectivSorting.iml" filepath="$PROJECT_DIR$/SelectivSorting.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

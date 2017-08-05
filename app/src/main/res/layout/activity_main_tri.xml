@@ -8,43 +8,70 @@
     android:orientation="vertical"
     tools:context="fr.julienj.otri.MainTri">
 
-    <FrameLayout
+    <RelativeLayout
         android:id="@+id/content"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <LinearLayout
+        <TableLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="match_parent" >
 
-            <Button
-                android:id="@+id/btnscancode"
-                android:visibility="visible"
+            <TableRow
+                android:id="@+id/tableRowBtnScan"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/FindPackaging"/>
+                android:layout_weight="1"
+                android:gravity="center"
+                android:background="@drawable/barcode"
+                android:layout_height="match_parent">
+                <Button
+                    android:id="@+id/btnscancode"
+                    android:visibility="visible"
+                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/FindPackaging"/>
+            </TableRow>
 
-            <EditText
-                android:id="@+id/seekProduct"
+            <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:visibility="visible"
-                android:inputType="textPersonName"
-                android:text="Name" />
+                android:layout_weight="1"
+                android:layout_height="match_parent">
+                <EditText
+                    android:id="@+id/seekProduct"
+                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:hint="@string/enterMaterialName"
+                    android:visibility="visible"
+                    android:inputType="textPersonName" />
+                <Button
+                    android:id="@+id/btnseekConteneur"
+                    android:visibility="visible"
+                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/txtBtnSeekConteneur"/>
+            </TableRow>
 
-            <Spinner
-                android:id="@+id/listItemSorting"
-                android:background="@color/colorPrimaryDark"
-                android:visibility="visible"
+            <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_weight="1"
+                android:layout_height="match_parent">
+                <com.weiwangcn.betterspinner.library.material.MaterialBetterSpinner
+                    android:id="@+id/listItemSorting"
+                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/hintSpinnerMaterial"
+                    android:textColorHint="#05ab9a"
+                    app:met_floatingLabel="normal" />
+            </TableRow>
 
-            </Spinner>
-
-            </LinearLayout>
+            </TableLayout>
 
 
 
@@ -64,7 +91,7 @@
         </FrameLayout>
 
 
-    </FrameLayout>
+    </RelativeLayout>
 
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/navigation"

@@ -2,13 +2,19 @@
     <string name="app_name">OTri</string>
     <string name="title_scan">Scan</string>
     <string name="title_mapsContainer">Carte Conteneurs</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="title_contribution">Contribuer</string>
     <string name="FindPackaging">Scanner emballage produit</string>
     <string name="title_activity_maps_conteneur">Map</string>
     <string name="spinnerSorting">Type emballage : </string>
+    <string name="enterMaterialName">Entrer le nom du produit </string>
+    <string name="hintSpinnerMaterial">Liste d\'emballage</string>
+    <string name="txtBtnSeekConteneur">Chercher</string>
     <!--String array-->
     <string-array name="arrayKindOfSorting">
         <item>Verre</item>
         <item>Papier</item>
     </string-array>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
