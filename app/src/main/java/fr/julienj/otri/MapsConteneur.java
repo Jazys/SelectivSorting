@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -13,6 +14,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
@@ -20,10 +22,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+
 import cz.msebera.android.httpclient.Header;
 
 
-public class MapsConteneur extends Fragment implements OnMapReadyCallback{
+public class MapsConteneur extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     private GoogleMap mMap;
 
@@ -48,13 +53,26 @@ public class MapsConteneur extends Fragment implements OnMapReadyCallback{
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        //Efface tout
+        mMap.clear();
+
+        //efface la liste des points si existants
+        if( !ContainerData.getInstance().listOfPointOfTri.isEmpty())
+            ContainerData.getInstance().listOfPointOfTri.clear();
+
+
+        System.out.println("Liste packaging : "+ Arrays.toString(ContainerData.getInstance().listePackaging));
+
 
         mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(ContainerData.getInstance().myLatitude, ContainerData.getInstance().myLongitude))
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
 
         try {
-            getNearConteneurFromMyPosition(ContainerData.getInstance().myLongitude, ContainerData.getInstance().myLatitude);
+            if (ContainerData.getInstance().isInternetAlive)
+                getNearConteneurFromMyPosition(ContainerData.getInstance().myLongitude, ContainerData.getInstance().myLatitude);
+            else
+                showToast("Pas de connexion Internet Disponible");
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -72,27 +90,44 @@ public class MapsConteneur extends Fragment implements OnMapReadyCallback{
 
     private void displayConteneur()
     {
+        String addInfoConteneur="";
+        Marker marker;
+
         //display all conteneur
         if( ContainerData.getInstance().listOfPointOfTri!=null)
         {
             double distance=-1;
             for (PointOfTri aPoint: ContainerData.getInstance().listOfPointOfTri)
             {
+
+                if(aPoint.listeConteneur!=null)
+                {
+
+                    addInfoConteneur = Arrays.toString(aPoint.listeConteneur);
+                }
+                else
+                    addInfoConteneur="Aucune information disponible";
+
                 if(aPoint.matchPackaging)
                 {
-                    mMap.addMarker(new MarkerOptions()
+                    marker=mMap.addMarker(new MarkerOptions()
                             .position(new LatLng(aPoint.latitude, aPoint.longitude))
                             .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
-                            .title(aPoint.road+","+aPoint.city))
-                            .showInfoWindow();
+                            .title(aPoint.road+","+aPoint.city));
+                    marker.setTag(aPoint.distance);
+                    marker.setSnippet(addInfoConteneur);
+                    marker.showInfoWindow();
                 }
                 else
                 {
-                    mMap.addMarker(new MarkerOptions()
+                    marker=mMap.addMarker(new MarkerOptions()
                             .position(new LatLng(aPoint.latitude, aPoint.longitude))
                             .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
-                            .title(aPoint.road+","+aPoint.city))
-                            .showInfoWindow();
+                            .title(aPoint.road+","+aPoint.city));
+                    marker.setTag(aPoint.distance);
+                    marker.setSnippet(addInfoConteneur);
+                    marker.showInfoWindow();
+
                 }
 
                 if(distance==-1 || distance>=aPoint.distance)
@@ -139,15 +174,20 @@ public class MapsConteneur extends Fragment implements OnMapReadyCallback{
 
                                 JSONArray listeMaterials = aPdc.getJSONArray("materials");
 
+                                aPointOfTri.listeConteneur=new String[listeMaterials.length()];
+
                                 for (int j = 0; j < listeMaterials.length(); j++) {
                                     JSONObject aMaterial = listeMaterials.getJSONObject(j);
                                     System.out.println(aMaterial.getString("label"));
+                                    aPointOfTri.listeConteneur[j]=aMaterial.getString("label");
 
                                     if (ContainerData.getInstance().listePackaging != null && ContainerData.getInstance().listePackaging.length >= 1) {
+
                                         for (int z = 0; z < ContainerData.getInstance().listePackaging.length; z++) {
 
                                             if (ContainerData.getInstance().listePackaging[z].equalsIgnoreCase(aMaterial.getString("label"))) {
                                                 aPointOfTri.matchPackaging = true;
+
                                             }
                                         }
                                     }
@@ -179,4 +219,26 @@ public class MapsConteneur extends Fragment implements OnMapReadyCallback{
             });
         }
     }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+
+        int position = (int)(marker.getTag());
+        return true;
+    }
+
+    public void showToast(final String toast)
+    {
+        getActivity().runOnUiThread(new Runnable() {
+            public void run()
+            {
+                Toast.makeText(getActivity(), toast, Toast.LENGTH_SHORT).show();
+
+
+
+            }
+        });
+    }
+
+
 }

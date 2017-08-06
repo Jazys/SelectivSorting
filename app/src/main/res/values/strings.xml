@@ -9,12 +9,27 @@
     <string name="enterMaterialName">Entrer le nom du produit </string>
     <string name="hintSpinnerMaterial">Liste d\'emballage</string>
     <string name="txtBtnSeekConteneur">Chercher</string>
+    <string name="txtBtnAlertdialogCancel">Annuler</string>
+    <string name="txtBtnAlertdialogGoToConteneur">Aller</string>
+    <string name="titleAlertDialgCustom">Liste des résultats</string>
+    <string name="textBtnWebView">Cacher/Afficher la page WEB</string>
     <!--String array-->
     <string-array name="arrayKindOfSorting">
         <item>Verre</item>
-        <item>Papier</item>
+        <item>Bouchons</item>
+        <item>Ampoules</item>
+        <item>Telephone</item>
+        <item>Materiel Informatique</item>
+        <item>Déchets vert</item>
+        <item>Vetements</item>
+         <item>Carton (grand)</item>
+        <item>Piles</item>
+        <item>Jouets</item>
+        <item>Cartes d\'encre</item>
+        <item>Chaussures</item>
+        <item>CD / DVD</item>
+        <item>Livres</item>
+        <item>Métaux</item>
     </string-array>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

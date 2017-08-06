@@ -59,22 +59,40 @@
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_weight="1"
+                android:layout_weight="0"
                 android:layout_height="match_parent">
-                <com.weiwangcn.betterspinner.library.material.MaterialBetterSpinner
-                    android:id="@+id/listItemSorting"
-                    android:layout_weight="1"
+                <LinearLayout
+                    android:orientation="vertical"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/hintSpinnerMaterial"
-                    android:textColorHint="#05ab9a"
-                    app:met_floatingLabel="normal" />
+                    android:layout_weight="1"
+                    android:layout_height="match_parent">
+                    <com.weiwangcn.betterspinner.library.material.MaterialBetterSpinner
+                        android:id="@+id/listItemSorting"
+                        android:layout_weight="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/hintSpinnerMaterial"
+                        android:textColorHint="#05ab9a"
+                        app:met_floatingLabel="normal" />
+                    <Button
+                        android:id="@+id/btnseekFromListChoice"
+                        android:visibility="visible"
+                        android:layout_weight="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/txtBtnSeekConteneur"/>
+                </LinearLayout>
             </TableRow>
 
             </TableLayout>
 
 
-
+        <Button
+            android:id="@+id/btnhideWebView"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/textBtnWebView"/>
         <WebView
             android:id="@+id/webview"
             android:layout_width="match_parent"

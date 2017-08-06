@@ -17,6 +17,7 @@ public class ContainerData {
     public String codeScanned;
     public String[] listePackaging;
     public ArrayList<PointOfTri> listOfPointOfTri;
+    public boolean isInternetAlive;
 
     public static ContainerData getInstance() {
         return ourInstance;
@@ -28,6 +29,7 @@ public class ContainerData {
         myLongitude=0;
         codeScanned="";
         listePackaging=null;
+        isInternetAlive=false;
         listOfPointOfTri=new ArrayList<PointOfTri>();
 
     }

@@ -1,11 +1,6 @@
 /*
 A faire par ordre de priorité
-- reste a afficher dans une alert Dialog le resultat de la recherche de consigne
-  avec le label + type de conteneur
-  Quand on clique, on peut aller directement sur la page des conteneurs
-
-- reste a afficher quand on clique sur le bac de tri, la liste disponibles des divers lables
-
+- Faire la page pour insérer un conteneur ou lieux
 
 - faire le menu pour :
     - ajouter un point de tri/recyclage
@@ -21,10 +16,15 @@ A faire par ordre de priorité
 package fr.julienj.otri;
 
 import android.Manifest;
+import android.app.Dialog;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -36,11 +36,14 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -55,6 +58,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import cz.msebera.android.httpclient.Header;
 import com.weiwangcn.betterspinner.library.material.MaterialBetterSpinner;
@@ -63,12 +68,17 @@ public class MainTri extends AppCompatActivity implements View.OnClickListener  
 
     private Button scanButton;
     private MaterialBetterSpinner  listItemSortingView;
+    private MaterialBetterSpinner listItemSortingViewCustomDialog;
     private EditText seekProductView;
     private Button seekPoductConteneur;
     private TableRow tableRowBtnScan;
+    private BottomNavigationView navigation;
+    private Button seekKindConteneurFromListChoice;
+    private Button hideShowWebViewBtn;
 
     //qr code scanner object
     private IntentIntegrator qrScan;
+    private Context contextApp;
 
     public double theContainerlatitude;
     public double theContainerlongitude;
@@ -88,6 +98,9 @@ public class MainTri extends AppCompatActivity implements View.OnClickListener  
 
     private String uriRestIndicationSortingFromKeywork;
 
+    private boolean anUrlPageIsLoaded;
+
+    private ProgressDialog progressDialog;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -101,12 +114,14 @@ public class MainTri extends AppCompatActivity implements View.OnClickListener  
                     seekPoductConteneur.setVisibility(View.VISIBLE);
                     seekProductView.setVisibility(View.VISIBLE);
                     listItemSortingView.setVisibility(View.VISIBLE);
-
+                    seekKindConteneurFromListChoice.setVisibility(View.VISIBLE);
                     tableRowBtnScan.setBackgroundResource(R.drawable.barcode);
 
-
-                    if( webview!=null)
+                    //Si une page a été chargé alors on réaffiche le bouton
+                    if(anUrlPageIsLoaded) {
+                        hideShowWebViewBtn.setVisibility(View.VISIBLE);
                         webview.setVisibility(View.VISIBLE);
+                    }
 
                     if(mapsGoogleFrag!=null) {
                         fragmentManager = getSupportFragmentManager();
@@ -122,6 +137,8 @@ public class MainTri extends AppCompatActivity implements View.OnClickListener  
                     scanButton.setVisibility(View.GONE);
                     listItemSortingView.setVisibility(View.GONE);
                     seekProductView.setVisibility(View.GONE);
+                    seekKindConteneurFromListChoice.setVisibility(View.GONE);
+                    hideShowWebViewBtn.setVisibility(View.GONE);
 
                     tableRowBtnScan.setBackgroundResource(0);
 
@@ -141,6 +158,8 @@ public class MainTri extends AppCompatActivity implements View.OnClickListener  
                     scanButton.setVisibility(View.GONE);
                     listItemSortingView.setVisibility(View.GONE);
                     seekProductView.setVisibility(View.GONE);
+                    seekKindConteneurFromListChoice.setVisibility(View.GONE);
+                    hideShowWebViewBtn.setVisibility(View.GONE);
 
                     tableRowBtnScan.setBackgroundResource(0);
 
@@ -164,19 +183,26 @@ public class MainTri extends AppCompatActivity implements View.OnClickListener  
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        contextApp=this.getApplicationContext();
+
         setContentView(R.layout.activity_main_tri);
 
         tableRowBtnScan=(TableRow) findViewById(R.id.tableRowBtnScan);
 
 
         seekPoductConteneur=(Button) findViewById(R.id.btnseekConteneur);
+        seekKindConteneurFromListChoice=(Button) findViewById(R.id.btnseekFromListChoice);
         scanButton=(Button) findViewById(R.id.btnscancode);
+        hideShowWebViewBtn=(Button) findViewById(R.id.btnhideWebView);
 
         //attaching onclick listener
         scanButton.setOnClickListener(this);
         scanButton.setVisibility(View.VISIBLE);
 
         seekPoductConteneur.setOnClickListener(this);
+        seekKindConteneurFromListChoice.setOnClickListener(this);
+        hideShowWebViewBtn.setOnClickListener(this);
 
         listItemSortingView=(MaterialBetterSpinner ) findViewById(R.id.listItemSorting);
         seekProductView=(EditText)  findViewById(R.id.seekProduct);
@@ -185,7 +211,7 @@ public class MainTri extends AppCompatActivity implements View.OnClickListener  
         seekProductView.setVisibility(View.VISIBLE);
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
-                this, R.array.arrayKindOfSorting, android.R.layout.simple_spinner_item);
+                this, R.array.arrayKindOfSorting, android.R.layout.simple_spinner_dropdown_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         listItemSortingView.setAdapter(adapter);
 
@@ -195,8 +221,18 @@ public class MainTri extends AppCompatActivity implements View.OnClickListener  
         webview.getSettings().setJavaScriptEnabled(true);
         webview.setVisibility(View.GONE);
 
-        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
+        navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
+        Timer timer = new Timer();
+
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                ContainerData.getInstance().isInternetAlive=((getNetworkType(contextApp)!=null)?true:false);
+
+            }
+        }, 1000, 30000);
 
         init();
     }
@@ -271,9 +307,16 @@ public class MainTri extends AppCompatActivity implements View.OnClickListener  
 
 
                     try {
-                        getInformationFormProduct();
-                        webview.loadUrl(ContainerData.getInstance().urlProductInfo+ContainerData.getInstance().codeScanned);
-                        //getNearConteneurFromMyPosition(myLatitude,myLongitude);
+
+                        if( ContainerData.getInstance().isInternetAlive)
+                        {
+                            getInformationFormProduct();
+                            anUrlPageIsLoaded=true;
+                            hideShowWebViewBtn.setVisibility(View.VISIBLE);
+                            webview.loadUrl(ContainerData.getInstance().urlProductInfo + ContainerData.getInstance().codeScanned);
+                        }
+                        else
+                            showToast("Pas de connexion Internet Disponible");
 
                     } catch (JSONException e1) {
                         e1.printStackTrace();
@@ -287,15 +330,39 @@ public class MainTri extends AppCompatActivity implements View.OnClickListener  
     }
     @Override
     public void onClick(View view) {
+
+
         //initiating the qr code scan
         switch(view.getId()) {
             case R.id.btnscancode:
+                hideShowWebViewBtn.setVisibility(View.GONE);
+                anUrlPageIsLoaded=false;
                 qrScan.initiateScan();
                 break;
             case R.id.btnseekConteneur:
-                System.out.println("test");
-                getIndicationForProduct();
+                hideShowWebViewBtn.setVisibility(View.GONE);
+                anUrlPageIsLoaded=false;
+                if(ContainerData.getInstance().isInternetAlive)
+                {
+                    progressDialog = ProgressDialog.show(MainTri.this, "",
+                            "Chargement", true);
+                    getIndicationForProduct();
+                }
+                else
+                    showToast("Pas de connexion Internet Disponible");
                 break;
+            case R.id.btnseekFromListChoice:
+                hideShowWebViewBtn.setVisibility(View.GONE);
+                anUrlPageIsLoaded=false;
+                showToast("Fonctionnalite non disponible");
+                break;
+            case R.id.btnhideWebView:
+                if( webview.getVisibility()==View.VISIBLE)
+                    webview.setVisibility(View.GONE);
+                else if(webview.getVisibility()==View.GONE)
+                    webview.setVisibility(View.VISIBLE);
+            break;
+
         }
 
     }
@@ -344,6 +411,9 @@ public class MainTri extends AppCompatActivity implements View.OnClickListener  
                 public void onSuccess(int statusCode, Header[] headers, JSONArray timeline) {
 
                 }
+
+
+
             });
         }
     }
@@ -359,7 +429,7 @@ public class MainTri extends AppCompatActivity implements View.OnClickListener  
 
 
         //https://ecoproxy.redshift.fr/api/v2/AutoComplete?searchText=carton
-        HttpUtils.get("https://ecoproxy.redshift.fr/api/v2/AutoComplete?searchText="+seekProductView.getText(), null, new JsonHttpResponseHandler(){
+        HttpUtils.get("https://ecoproxy.redshift.fr/api/v2/AutoComplete?searchText="+seekProductView.getText().toString().trim(), null, new JsonHttpResponseHandler(){
             //HttpUtils.get("3222476439574.json", null, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -385,6 +455,11 @@ public class MainTri extends AppCompatActivity implements View.OnClickListener  
                     e.printStackTrace();
                     packingsSeek="";
                     keyworkSeek="";
+                    if(progressDialog!=null)
+                    {
+                        progressDialog.dismiss();
+                        progressDialog=null;
+                    }
                 }
             }
 
@@ -403,21 +478,70 @@ public class MainTri extends AppCompatActivity implements View.OnClickListener  
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
 
+                boolean haveAItem=false;
+
                 try{
                     JSONArray listeItemSuggested= response.getJSONArray("objects");
+                    String[] listeLabelAndMaterial= new String[listeItemSuggested.length()];
 
                     for(int i=0; i<listeItemSuggested.length(); i++) {
+                        haveAItem=true;
                         JSONObject aIndication = listeItemSuggested.getJSONObject(i);
 
                         System.out.println("*"+(aIndication.getString("label")).trim());
                         System.out.println("**"+(aIndication.getString("deposit")).trim());
                         System.out.println("***"+(aIndication.getString("material")).trim());
 
+                        listeLabelAndMaterial[i]=(aIndication.getString("label")).trim()+ " -- Conteneur : ";
+
+                        //Il existe un cas O
+                        switch ( aIndication.getString("material").charAt(0)) {
+                            case 'C':
+                                listeLabelAndMaterial[i]+="Carton";
+                                break;
+                            case 'D':
+                                listeLabelAndMaterial[i]+="déchetterie";
+                                break;
+                            case 'V':
+                                listeLabelAndMaterial[i]+="Verre";
+                                break;
+                            case 'B':
+                                listeLabelAndMaterial[i]+="Brique";
+                                break;
+                            case 'M':
+                                listeLabelAndMaterial[i]+="Métal";
+                                break;
+                            case 'P':
+                                listeLabelAndMaterial[i]+="Plastique";
+                                break;
+                            case 'J':
+                                listeLabelAndMaterial[i]+="Papiers";
+                                break;
+                            default:
+                                listeLabelAndMaterial[i]+=aIndication.getString("material");
+                                break;
+                        }
 
 
                     }
+
+                    if(progressDialog!=null)
+                    {
+                        progressDialog.dismiss();
+                        progressDialog=null;
+                    }
+
+                    if (haveAItem)
+                        createCustomDialogForKeyword(listeLabelAndMaterial);
+                    else
+                        showToast("Aucun élément trouvé");
                 }catch (JSONException e) {
                     e.printStackTrace();
+                    if(progressDialog!=null)
+                    {
+                        progressDialog.dismiss();
+                        progressDialog=null;
+                    }
 
                 }
             }
@@ -427,6 +551,77 @@ public class MainTri extends AppCompatActivity implements View.OnClickListener  
 
             }
         });
+    }
+
+    private void createCustomDialogForKeyword(String[] arrayList)
+    {
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.custom_alertdialog_keyword);
+
+        //liste des choix disponibles en fonction de la recherche
+        listItemSortingViewCustomDialog=(MaterialBetterSpinner) dialog.findViewById(R.id.listItemSortingAlertDialog);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, arrayList);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+
+
+        listItemSortingViewCustomDialog.setAdapter(adapter);
+
+        //bouton et action
+        Button dialogButtonCancel = (Button) dialog.findViewById(R.id.btnCancelAlertDialog);
+
+        dialogButtonCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+
+
+        Button dialogButtonGoConteneur = (Button) dialog.findViewById(R.id.btnGoToConteneurAlertDialog);
+
+        dialogButtonGoConteneur.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                //Permet d'obtenir le type de conteneur sous forme d'un tableau de string
+                ContainerData.getInstance().listePackaging=listItemSortingViewCustomDialog.getText().toString()
+                        .replace(" -- Conteneur : ",";")
+                        .split(";")[1].split(";;");
+
+                dialog.dismiss();
+
+                //Pour sélectionner le menu carte Conteneurs
+                navigation.getMenu().findItem(R.id.navigation_mapsContainer).setChecked(true);
+
+                //Pour faire appel à l'API de google Maps
+                fragmentManager = getSupportFragmentManager();
+                fragmentTransaction = fragmentManager.beginTransaction();
+                mapsGoogleFrag = new MapsConteneur();
+                fragmentTransaction.replace(R.id.fragment_container,mapsGoogleFrag);
+                fragmentTransaction.commit();
+
+
+            }
+        });
+
+        dialog.show();
+
+        listItemSortingViewCustomDialog.setFocusable(true);
+
+        //Pour séléctionner le premier Item
+        listItemSortingViewCustomDialog.setText(arrayList[0]);
+
+        //Permet d'obtenir le type de conteneur sous forme d'un tableau de string
+        ContainerData.getInstance().listePackaging=arrayList[0]
+                .replace(" -- Conteneur : ",";")
+                .split(";")[1].split(";;");
+
+
+        //toute la largeur et au mini 1/3 en hauteur
+        dialog.getWindow().setLayout(getWindow().getDecorView().getRootView().getWidth(), getWindow().getDecorView().getRootView().getHeight()/3);
     }
 
     public void showToast(final String toast)
@@ -440,6 +635,22 @@ public class MainTri extends AppCompatActivity implements View.OnClickListener  
 
             }
         });
+    }
+
+    public String getNetworkType(Context context){
+        String networkType = null;
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
+        if (activeNetwork != null) { // connected to the internet
+            if (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI) {
+                networkType = "WiFi";
+            } else if (activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE) {
+                networkType = "Mobile";
+            }
+        } else {
+            // not connected to the internet
+        }
+        return networkType;
     }
 
 }
