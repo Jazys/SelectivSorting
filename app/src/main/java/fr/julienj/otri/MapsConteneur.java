@@ -17,6 +17,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.TextHttpResponseHandler;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -80,7 +81,7 @@ public class MapsConteneur extends Fragment implements OnMapReadyCallback, Googl
 
 
 
-
+        getOuRecyclerData();
         //LatLng UCA = new LatLng(-34, 151);
         //mMap.addMarker(new MarkerOptions().position(UCA).title("YOUR TITLE")).showInfoWindow();
 
@@ -225,6 +226,23 @@ public class MapsConteneur extends Fragment implements OnMapReadyCallback, Googl
 
         int position = (int)(marker.getTag());
         return true;
+    }
+
+    public void getOuRecyclerData()
+    {
+        HttpUtils.get(OuRecyclerManager.getUrlOuRecyclcer(ContainerData.getInstance().myLongitude, ContainerData.getInstance().myLatitude,""), null,  new TextHttpResponseHandler() {
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, String res) {
+                        // called when response HTTP status is "200 OK"
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, String res, Throwable t) {
+                        // called when response HTTP status is "4XX" (eg. 401, 403, 404)
+                    }
+                }
+        );
+
     }
 
     public void showToast(final String toast)
