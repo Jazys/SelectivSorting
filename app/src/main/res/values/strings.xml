@@ -6,8 +6,8 @@
     <string name="FindPackaging">Scanner emballage produit</string>
     <string name="title_activity_maps_conteneur">Map</string>
     <string name="spinnerSorting">Type emballage : </string>
-    <string name="enterMaterialName">Entrer le nom du produit </string>
-    <string name="hintSpinnerMaterial">Liste d\'emballage</string>
+    <string name="enterMaterialName">Recherche par nom d\'emballage </string>
+    <string name="hintSpinnerMaterial">Recherche par liste d\'emballage</string>
     <string name="txtBtnSeekConteneur">Chercher</string>
     <string name="txtBtnAlertdialogCancel">Annuler</string>
     <string name="txtBtnAlertdialogGoToConteneur">Aller</string>
@@ -15,6 +15,7 @@
     <string name="textBtnWebView">Cacher/Afficher la page WEB</string>
     <string name="textAddPointConteneur">Ajouter un Point de collect/Déchetterie</string>
     <string name="textAddProductInfo">Ajouter la description d\' produit</string>
+    <string  name="appOpenFoodFacts">org.openfoodfacts.scanner</string>
     <!--String array-->
     <string-array name="arrayKindOfSorting">
         <item>Verre</item>

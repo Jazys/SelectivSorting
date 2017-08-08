@@ -79,23 +79,20 @@
                 <CheckBox
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="verre"/>
+                    android:text="Verre"/>
                 <CheckBox
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="verre"/>
+                    android:text="Plastique"/>
                 <CheckBox
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="verre"/>
+                    android:text="Brique"/>
                 <CheckBox
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="verre"/>
-                <CheckBox
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="verre"/>
+                    android:text="Papiers"/>
+
             </LinearLayout>
 
         </TableRow>
@@ -111,23 +108,20 @@
                 <CheckBox
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="verre"/>
+                    android:text="Ampoules"/>
                 <CheckBox
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="verre"/>
+                    android:text="Piles"/>
                 <CheckBox
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="verre"/>
+                    android:text="Téléphone"/>
                 <CheckBox
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="verre"/>
-                <CheckBox
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="verre"/>
+                    android:text="Jouets"/>
+
             </LinearLayout>
 
         </TableRow>
@@ -143,23 +137,42 @@
                 <CheckBox
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="verre"/>
+                    android:text="Cartouche encres"/>
                 <CheckBox
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="verre"/>
+                    android:text="Chaussures"/>
                 <CheckBox
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="verre"/>
+                    android:text="Cd/Dvd"/>
+
+            </LinearLayout>
+
+        </TableRow>
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_weight="0"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:orientation="horizontal"
+                android:layout_height="match_parent">
                 <CheckBox
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="verre"/>
+                    android:text="Livres"/>
                 <CheckBox
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="verre"/>
+                    android:text="Déchetterie communale"/>
+                <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Compost"/>
+
             </LinearLayout>
 
         </TableRow>
@@ -174,9 +187,9 @@
                 android:layout_height="match_parent">
 
                 <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Description (optionnel) :"/>
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Description (option.) :"/>
                 <EditText
                     android:id="@+id/contribDesc"
                     android:layout_weight="1"
@@ -184,21 +197,21 @@
                     android:lines="2"
                     android:minLines="2"
                     android:maxLines="5"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    />
-                <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Ajouter"/>
+                    />
 
             </LinearLayout>
 
         </TableRow>
-
+        <Button
+            android:id="@+id/btnAddPointTri"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ajouter"/>
         <TableRow
             android:layout_width="match_parent"
-            android:paddingTop="30dp"
+            android:paddingTop="15dp"
             android:layout_height="match_parent">
             <TextView
                 android:id="@+id/contribTxtAddProduct"
@@ -215,9 +228,10 @@
         </TableRow>
 
         <Button
+            android:id="@+id/btnAddProductInfo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Se rendre sur  ..."/>
+            android:text="Se rendre sur  openfoodfacts"/>
 
     </TableLayout>
 

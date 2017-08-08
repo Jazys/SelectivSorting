@@ -1,5 +1,7 @@
 package fr.julienj.otri;
 
+import android.location.Address;
+import android.location.Geocoder;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -23,8 +25,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -86,6 +91,30 @@ public class MapsConteneur extends Fragment implements OnMapReadyCallback, Googl
         //mMap.addMarker(new MarkerOptions().position(UCA).title("YOUR TITLE")).showInfoWindow();
 
         //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(UCA,17));
+
+        Geocoder gcd = new Geocoder(getContext(), Locale.getDefault());
+        List<Address> addresses = null;
+        try {
+            addresses = gcd.getFromLocation(ContainerData.getInstance().myLatitude, ContainerData.getInstance().myLongitude, 20);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("88888888888888888888888 "+addresses.size());
+        for(int i=0;i<addresses.size();i++)
+        {
+           // addresses.get(i).toString()
+            System.out.println(addresses.get(i).toString());
+        }
+        if (addresses.size() > 0)
+        {
+            System.out.println(addresses.get(0).getLocality());
+        }
+        else
+        {
+            // do your staff
+        }
 
     }
 

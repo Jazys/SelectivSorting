@@ -1,16 +1,19 @@
 /*
-A faire par ordre de priorité
-- Faire la page pour insérer un conteneur ou lieux
+A faire
+- Ajouter un conteneur : prendre les différents infos disponibles et renseigner une URL
+- Ajouter l'interaction avec OuRecycler
+- Ajouter l'interaction Dechetteries.fr
+- Nettoyer le code
+- Ameliorer l'IHM
+- Faire des Test
 
-- faire le menu pour :
-    - ajouter un point de tri/recyclage
-    - ajouter un produit alimentaire
-
-- finir le spinner pour avoir tous les autres types de déchets
-
-- améliorer l'ihm
+Pour OuRecycler et dechetterie.fr ==> BDD sqlite ??
 
  */
+
+//Geocodage
+//http://maps.googleapis.com/maps/api/geocode/json?latlng=45.3,5.03&sensor=true
+//http://maps.googleapis.com/maps/api/geocode/json?address=grenoble
 
 
 package fr.julienj.otri;
@@ -123,13 +126,28 @@ public class MainTri extends AppCompatActivity implements View.OnClickListener  
                         webview.setVisibility(View.VISIBLE);
                     }
 
-                    if(mapsGoogleFrag!=null) {
+                    /*if(mapsGoogleFrag!=null) {
                         fragmentManager = getSupportFragmentManager();
                         fragmentTransaction = fragmentManager.beginTransaction();
                         fragmentTransaction.remove(getSupportFragmentManager().findFragmentById(R.id.fragment_container)).commit();
-                        //fragmentTransaction.commit();
+
                         mapsGoogleFrag=null;
                     }
+
+                    if(contirbutionFrag!=null) {
+                        fragmentManager = getSupportFragmentManager();
+                        fragmentTransaction = fragmentManager.beginTransaction();
+                        fragmentTransaction.remove(getSupportFragmentManager().findFragmentById(R.id.fragment_container)).commit();
+
+                        contirbutionFrag=null;
+                    }*/
+
+                    fragmentManager = getSupportFragmentManager();
+                    fragmentTransaction = fragmentManager.beginTransaction();
+                    fragmentTransaction.remove(getSupportFragmentManager().findFragmentById(R.id.fragment_container)).commit();
+
+
+
                     return true;
                 case R.id.navigation_mapsContainer:
 
@@ -269,7 +287,7 @@ public class MainTri extends AppCompatActivity implements View.OnClickListener  
             ContainerData.getInstance().myLongitude = servGPS.getLongitude();
 
             // \n is for new line
-            Toast.makeText(getApplicationContext(), "Your Location is - \nLat: " + ContainerData.getInstance().myLatitude + "\nLong: " + ContainerData.getInstance().myLongitude, Toast.LENGTH_LONG).show();
+           // Toast.makeText(getApplicationContext(), "Your Location is - \nLat: " + ContainerData.getInstance().myLatitude + "\nLong: " + ContainerData.getInstance().myLongitude, Toast.LENGTH_LONG).show();
         }else{
             // can't get location
             // GPS or Network is not enabled
