@@ -1,6 +1,6 @@
 # SelectivSorting
 
-Projet communautaire sur les points de recyclage en France.<br>
+Idée de projet communautaire sur les points de recyclage en France.<br>
 Il est possible de scanner un embllage d'un aliment et ainsi savoir où se trouve le point de tri le plus près.
 Utile pour ceux qui veulent trier même en vacances loin de nos repères.<br>
 
